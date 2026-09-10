@@ -3576,10 +3576,10 @@ window.handleGlobalKeydown = function(e) {
   const activeElement = document.activeElement;
   const isEditing = activeElement.tagName === 'INPUT' || 
                     activeElement.tagName === 'TEXTAREA' || 
-                    (activeElement.isContentEditable); // Captura o Post-it!
+                    (activeElement && activeElement.isContentEditable); // Captura o Post-it!
 
-  // Se estiver editando e a tecla for uma seta, sai imediatamente (ignora o resto da função)
-  if (isEditing && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+  // Se estiver editando qualquer texto, IGNORA QUALQUER atalho da mesa completamente
+  if (isEditing) {
     return; 
   }
 
@@ -3591,6 +3591,10 @@ window.handleGlobalKeydown = function(e) {
     e.preventDefault();
     console.log('🛑 Scroll da mesa bloqueado.');
   }
+
+
+
+
 
   // Interceptador para a barra de carimbos da lousa
   const menuCarimbos = document.getElementById('lousa-stamp-scroll');
