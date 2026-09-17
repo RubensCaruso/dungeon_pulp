@@ -4,6 +4,8 @@
 
 
 <script>
+    // VERSAO 17set2026 - AJuste na ABA de combate! formulas levemente mexidas tbem
+    // VERSAO 10set2026 - Ajuste bloqueando fuções e desmarcando a carta ao estar escrevendo em uma area de texto!
     // VERSAO 31 -DADOS agora com botões superiores de + - e face oposta
     // VERSAO 30.33 - Liguagem simples para programação de formulas e criação de constantes feita 
     // VERSAO 20-28.0 - AJUSTES NA POPUP DE REGRAS e botão setup
@@ -4194,6 +4196,10 @@ window.addEventListener('load', initLousaGlobal);
 
 
 
+
+
+<!-- PAINEL DE COMBATE (HTML) -->
+<!-- PAINEL DE COMBATE (HTML) -->
 <div id="inspectorPanel" class="inspector-drawer">
     
     <div class="drawer-tab" onclick="toggleCombatPanel()">⚔️</div>
@@ -4203,16 +4209,16 @@ window.addEventListener('load', initLousaGlobal);
         <button class="close-btn" onclick="closeInspector()">X</button>
     </div>
     
-    
-    
     <div class="combat-section hero-section" style="flex-shrink: 0;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <h3 style="margin: 0;">🛡️ Status do Herói</h3>
-            <span id="turnDisplay" style="color: gold; font-weight: bold; font-size: 1.1rem; text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);">TURNO: 1</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <button onclick="addCustomHeroStat()" title="Adicionar novo status" style="background: #22c55e; color: white; border: none; border-radius: 4px; padding: 2px 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">+</button>
+                <span id="turnDisplay" style="color: gold; font-weight: bold; font-size: 1.1rem; text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);">TURNO: 1</span>
+            </div>
         </div>
         
-        
-        
+        <!-- Status Padrão: Vida -->
         <div class="stat-row">
             <span class="stat-label">Vida (HP):</span>
             <div class="counter-control">
@@ -4221,32 +4227,24 @@ window.addEventListener('load', initLousaGlobal);
                 <button class="btn-plus" onclick="adjustHeroHp(1)">+</button>
             </div>
         </div>
-        
-        <div class="stat-row">
-            <span class="stat-label">Dano Base:</span>
-            <div class="counter-control">
-                <button class="btn-minus" onclick="adjustHeroDmg(-1)">-</button>
-                <span id="heroDmgDisplay" class="display-value">0</span>
-                <button class="btn-plus" onclick="adjustHeroDmg(1)">+</button>
-            </div>
+
+        <!-- Container onde serão inseridos os status/contadores adicionais criados pelo jogador -->
+        <div id="customHeroStatsContainer"></div>
+
+        <!-- Cabeçalho do botão de notas -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <h4 style="margin: 0;">📝 Notas do Herói</h4>
+            <button id="toggleHeroNotesBtn" onclick="toggleHeroNotes()" style="cursor: pointer; background: #333; color: white; border: none; border-radius: 4px; padding: 2px 8px; font-size: 0.7rem;">Esconder</button>
         </div>
 
-       <!-- Cabeçalho do botão de notas -->
-<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-    <h4 style="margin: 0;">📝 Notas do Herói</h4>
-    <button id="toggleHeroNotesBtn" onclick="toggleHeroNotes()" style="cursor: pointer; background: #333; color: white; border: none; border-radius: 4px; padding: 2px 8px; font-size: 0.7rem;">Esconder</button>
-</div>
-
-<!-- Container específico para o campo de notas -->
-<div id="heroNotesContainer" style="display: block;">
-    <textarea id="heroNotes" 
-              class="notes-area" 
-              placeholder="Anotações do herói..." 
-              onfocus="if(typeof deselectCard === 'function') { deselectCard(); console.log('🎨 Editando texto: Carta desselecionada.'); }">
-    </textarea>
-</div>
-
-
+        <!-- Container específico para o campo de notas -->
+        <div id="heroNotesContainer" style="display: block;">
+            <textarea id="heroNotes" 
+                      class="notes-area" 
+                      placeholder="Anotações do herói..." 
+                      onfocus="if(typeof deselectCard === 'function') { deselectCard(); console.log('🎨 Editando texto: Carta desselecionada.'); }">
+            </textarea>
+        </div>
 
     </div>
 
@@ -4255,40 +4253,37 @@ window.addEventListener('load', initLousaGlobal);
     <button class="btn-add-enemy" onclick="addNewEnemy()">+</button>
 
     <div class="enemies-scroll-area" id="enemiesContainer" style="flex: 1; overflow-y: auto; padding-top: 15px;">
-        </div>
+    </div>
 
 </div>
 
-
+<!-- SCRIPT DO PAINEL DE COMBATE COM SUPORTE A SAVE E LOAD -->
 <script>
 // --- ESTADO DO HERÓI ---
 let heroHp = 0;
 let heroMaxHp = 200;
-let heroDmg = 0;
+
+// --- ESTADO DOS STATUS CUSTOMIZADOS DO HERÓI ---
+let customHeroStats = {};
+let customHeroStatCounter = 0;
 
 // --- ESTADO DOS INIMIGOS DINÂMICOS ---
-let enemiesData = {}; // Guarda os dados de cada inimigo gerado
-let enemyCounter = 0; // Cria IDs únicos (0, 1, 2, 3...)
+let enemiesData = {}; 
+let enemyCounter = 0; 
 
 // --- CONTROLE DO PAINEL LATERAL ---
 function toggleCombatPanel() {
     const panel = document.getElementById('inspectorPanel');
     panel.classList.toggle('active');
     
-    
-    // --- ADICIONE ESTAS LINHAS AQUI ---
-    // Verifica se a classe 'active' foi adicionada (ou seja, o painel abriu)
     if (panel.classList.contains('active')) {
         if (typeof deselectCard === 'function') {
             deselectCard();
-            console.log("🎨 Lousa aberta: Carta desselecionada.");
         }
     }
-    // ----------------------------------
 
     updateHeroDisplay();
 }
-
 
 function closeInspector() {
     document.getElementById('inspectorPanel').classList.remove('active');
@@ -4296,30 +4291,61 @@ function closeInspector() {
 
 // --- LÓGICA DO HERÓI ---
 function updateHeroDisplay() {
-    document.getElementById('heroHpDisplay').innerText = `${heroHp}/${heroMaxHp}`;
-    document.getElementById('heroDmgDisplay').innerText = heroDmg;
+    const hpDisplay = document.getElementById('heroHpDisplay');
+    if (hpDisplay) hpDisplay.innerText = `${heroHp}/${heroMaxHp}`;
 }
 
 function adjustHeroHp(amount) {
-    heroHp = Math.max(0, Math.min(heroMaxHp, heroHp + amount));
+    heroHp = Math.min(heroMaxHp, heroHp + amount); // Permite valores negativos
     updateHeroDisplay();
 }
 
-function adjustHeroDmg(amount) {
-    heroDmg = Math.max(0, heroDmg + amount);
-    updateHeroDisplay();
+// --- LÓGICA DE STATUS CUSTOMIZADOS DO HERÓI ---
+function addCustomHeroStat() {
+    const id = customHeroStatCounter++;
+    customHeroStats[id] = 0;
+
+    const container = document.getElementById('customHeroStatsContainer');
+
+    const statHtml = `
+        <div class="stat-row" id="customHeroStatRow-${id}" style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; gap: 4px; width: 100%;">
+            <input type="text" 
+                   placeholder="Nome (ex: Laser, Vida 2)..." 
+                   style="background: #111; color: #fff; border: 1px solid #444; border-radius: 4px; padding: 4px 6px; font-size: 0.85rem; flex: 1; min-width: 0;" 
+                   onfocus="if(typeof deselectCard === 'function') deselectCard();" />
+            
+            <div style="display: flex; align-items: center; gap: 2px; flex-shrink: 0;">
+                <button onclick="adjustCustomHeroStat(${id}, -1)" style="background: #27272a; color: #fff; border: 1px solid #3f3f46; border-radius: 4px; padding: 0 4px !important; min-width: 20px !important; height: 24px; cursor: pointer; font-size: 0.85rem; margin: 0 !important;">-</button>
+                <span id="customHeroStatDisplay-${id}" style="padding: 0 2px !important; min-width: 18px !important; height: 24px; line-height: 22px; text-align: center; font-weight: bold; font-size: 0.85rem; display: inline-block; background: #111; border: 1px solid #333; border-radius: 4px; color: #fff; margin: 0 !important;">0</span>
+                <button onclick="adjustCustomHeroStat(${id}, 1)" style="background: #27272a; color: #fff; border: 1px solid #3f3f46; border-radius: 4px; padding: 0 4px !important; min-width: 20px !important; height: 24px; cursor: pointer; font-size: 0.85rem; margin: 0 !important;">+</button>
+                <button onclick="removeCustomHeroStat(${id})" title="Remover status" style="background: transparent; color: #ef4444; border: none; cursor: pointer; padding: 0 2px; margin-left: 2px; font-weight: bold; font-size: 0.9rem;">✕</button>
+            </div>
+        </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', statHtml);
+}
+
+function adjustCustomHeroStat(id, amount) {
+    if (customHeroStats[id] === undefined) return;
+    customHeroStats[id] = customHeroStats[id] + amount; // Permite números negativos
+    const display = document.getElementById(`customHeroStatDisplay-${id}`);
+    if (display) display.innerText = customHeroStats[id];
+}
+
+function removeCustomHeroStat(id) {
+    delete customHeroStats[id];
+    const row = document.getElementById(`customHeroStatRow-${id}`);
+    if (row) row.remove();
 }
 
 // --- LÓGICA DE INIMIGOS (GERADOR DINÂMICO) ---
 function addNewEnemy() {
-    const id = enemyCounter++; // Pega um ID único e soma 1 pro próximo
-    
-    // Registra os status iniciais na nossa lista de dados
-    enemiesData[id] = { hp: 0, maxHp: 200, str: 0 };
+    const id = enemyCounter++;
+    enemiesData[id] = { hp: 0, maxHp: 200 };
 
     const container = document.getElementById('enemiesContainer');
 
-    // Estrutura HTML do card do novo inimigo
     const enemyCardHtml = `
         <div class="combat-section enemy-section" id="enemyCard-${id}" style="margin-bottom: 20px; border: 1px solid #333; padding: 12px; border-radius: 8px; background-color: #1e1e24; border-left: 4px solid #f97316;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -4336,58 +4362,34 @@ function addNewEnemy() {
                 </div>
             </div>
             
-            <div class="stat-row">
-                <span class="stat-label">Dano Base:</span>
-                <div class="counter-control">
-                    <button class="btn-minus" onclick="adjustDynEnemyStr(${id}, -1)">-</button>
-                    <span id="enemyStrDisplay-${id}" class="display-value">0</span>
-                    <button class="btn-plus" onclick="adjustDynEnemyStr(${id}, 1)">+</button>
-                </div>
+            <div class="stat-row" style="flex-direction: column !important; align-items: flex-start !important; gap: 4px;">
+                <span class="stat-label">Dano / Info do Inimigo:</span>
+                <input type="text" 
+                       id="enemyCustomText-${id}" 
+                       placeholder="Digite o dano, ataque ou tipo..." 
+                       style="background: #121216; color: #ffffff; border: 1px solid #3f3f46; border-radius: 6px; padding: 6px 8px; font-size: 0.85rem; width: 100%; box-sizing: border-box;" 
+                       onfocus="if(typeof deselectCard === 'function') deselectCard();" />
             </div>
 
-<textarea id="enemyNotes-${id}" class="notes-area" placeholder="Anotações deste inimigo..." onfocus="if(typeof deselectCard === 'function') { deselectCard(); console.log('🎨 Editando texto: Carta desselecionada.'); }"></textarea>
+            <textarea id="enemyNotes-${id}" class="notes-area" placeholder="Anotações deste inimigo..." onfocus="if(typeof deselectCard === 'function') { deselectCard(); }"></textarea>
+        </div>
     `;
 
-    // Insere o html no final da barra de rolagem, sem apagar os que já existem
     container.insertAdjacentHTML('beforeend', enemyCardHtml);
 }
 
-// Remove o inimigo específico da tela e da memória
 function removeEnemy(id) {
     delete enemiesData[id];
     const card = document.getElementById(`enemyCard-${id}`);
     if(card) card.remove();
 }
 
-// Altera a vida apenas do inimigo clicado
 function adjustDynEnemyHp(id, amount) {
     if(!enemiesData[id]) return;
-    enemiesData[id].hp = Math.max(0, Math.min(enemiesData[id].maxHp, enemiesData[id].hp + amount));
+    enemiesData[id].hp = Math.min(enemiesData[id].maxHp, enemiesData[id].hp + amount); // Permite valores negativos
     document.getElementById(`enemyHpDisplay-${id}`).innerText = `${enemiesData[id].hp}/${enemiesData[id].maxHp}`;
 }
 
-// Altera a força apenas do inimigo clicado
-function adjustDynEnemyStr(id, amount) {
-    if(!enemiesData[id]) return;
-    enemiesData[id].str = Math.max(0, enemiesData[id].str + amount);
-    document.getElementById(`enemyStrDisplay-${id}`).innerText = enemiesData[id].str;
-}
-
-// Vinculação global das funções
-window.toggleCombatPanel = toggleCombatPanel;
-window.closeInspector = closeInspector;
-window.adjustHeroHp = adjustHeroHp;
-window.adjustHeroDmg = adjustHeroDmg;
-window.addNewEnemy = addNewEnemy;
-window.removeEnemy = removeEnemy;
-window.adjustDynEnemyHp = adjustDynEnemyHp;
-window.adjustDynEnemyStr = adjustDynEnemyStr;
-
-
-
-
-
-//FUNÇÃO para ESCONDER ou RESTAURAR area de texto da aba de combate com botao
 function toggleHeroNotes() {
     const container = document.getElementById('heroNotesContainer');
     const btn = document.getElementById('toggleHeroNotesBtn');
@@ -4400,6 +4402,180 @@ function toggleHeroNotes() {
         btn.innerText = "Mostrar Notas";
     }
 }
+
+// ==========================================
+// FUNÇÕES DE SAVE E LOAD DO PAINEL DE COMBATE
+// ==========================================
+function getCombatState() {
+    const turn = typeof currentTurn !== 'undefined' ? currentTurn : 1;
+
+    const heroHpVal = heroHp || 0;
+    const heroMaxHpVal = heroMaxHp || 200;
+    const heroNotesVal = document.getElementById('heroNotes') ? document.getElementById('heroNotes').value : '';
+    const heroNotesVisible = document.getElementById('heroNotesContainer') ? (document.getElementById('heroNotesContainer').style.display !== 'none') : true;
+
+    const customStats = [];
+    const customRows = document.querySelectorAll('[id^="customHeroStatRow-"]');
+    customRows.forEach(row => {
+        const rowId = row.id.replace('customHeroStatRow-', '');
+        const inputEl = row.querySelector('input[type="text"]');
+        const nameVal = inputEl ? inputEl.value : '';
+        const countVal = customHeroStats[rowId] !== undefined ? customHeroStats[rowId] : 0;
+        customStats.push({ id: rowId, name: nameVal, value: countVal });
+    });
+
+    const enemies = [];
+    Object.keys(enemiesData).forEach(id => {
+        const enemyObj = enemiesData[id];
+        const customTextEl = document.getElementById(`enemyCustomText-${id}`);
+        const notesEl = document.getElementById(`enemyNotes-${id}`);
+        enemies.push({
+            id: id,
+            hp: enemyObj.hp || 0,
+            maxHp: enemyObj.maxHp || 200,
+            customText: customTextEl ? customTextEl.value : '',
+            notes: notesEl ? notesEl.value : ''
+        });
+    });
+
+    return {
+        turn: turn,
+        hero: {
+            hp: heroHpVal,
+            maxHp: heroMaxHpVal,
+            notes: heroNotesVal,
+            notesVisible: heroNotesVisible
+        },
+        customHeroStats: customStats,
+        enemies: enemies,
+        enemyCounter: enemyCounter,
+        customHeroStatCounter: customHeroStatCounter
+    };
+}
+
+function setCombatState(state) {
+    if (!state) return;
+
+    // 1. Restaurar Turno
+    if (state.turn !== undefined && typeof currentTurn !== 'undefined') {
+        currentTurn = state.turn;
+        if (typeof updateTurnDisplay === 'function') updateTurnDisplay();
+    }
+
+    // 2. Restaurar Herói
+    if (state.hero) {
+        if (state.hero.hp !== undefined) heroHp = state.hero.hp;
+        if (state.hero.maxHp !== undefined) heroMaxHp = state.hero.maxHp;
+        updateHeroDisplay();
+
+        if (state.hero.notes !== undefined) {
+            const heroNotes = document.getElementById('heroNotes');
+            if (heroNotes) heroNotes.value = state.hero.notes;
+        }
+
+        if (state.hero.notesVisible !== undefined) {
+            const container = document.getElementById('heroNotesContainer');
+            const btn = document.getElementById('toggleHeroNotesBtn');
+            if (container && btn) {
+                if (state.hero.notesVisible) {
+                    container.style.display = 'block';
+                    btn.innerText = 'Esconder';
+                } else {
+                    container.style.display = 'none';
+                    btn.innerText = 'Mostrar Notas';
+                }
+            }
+        }
+    }
+
+    // 3. Restaurar Status Customizados do Herói
+    const customContainer = document.getElementById('customHeroStatsContainer');
+    if (customContainer) customContainer.innerHTML = '';
+    customHeroStats = {};
+    if (state.customHeroStatCounter !== undefined) customHeroStatCounter = state.customHeroStatCounter;
+
+    if (state.customHeroStats && Array.isArray(state.customHeroStats)) {
+        state.customHeroStats.forEach(stat => {
+            const id = stat.id;
+            customHeroStats[id] = stat.value !== undefined ? stat.value : 0;
+
+            const statHtml = `
+                <div class="stat-row" id="customHeroStatRow-${id}" style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; gap: 4px; width: 100%;">
+                    <input type="text" 
+                           value="${(stat.name || '').replace(/"/g, '&quot;')}"
+                           placeholder="Nome (ex: Laser, Vida 2)..." 
+                           style="background: #111; color: #fff; border: 1px solid #444; border-radius: 4px; padding: 4px 6px; font-size: 0.85rem; flex: 1; min-width: 0;" 
+                           onfocus="if(typeof deselectCard === 'function') deselectCard();" />
+                    
+                    <div style="display: flex; align-items: center; gap: 2px; flex-shrink: 0;">
+                        <button onclick="adjustCustomHeroStat(${id}, -1)" style="background: #27272a; color: #fff; border: 1px solid #3f3f46; border-radius: 4px; padding: 0 4px !important; min-width: 20px !important; height: 24px; cursor: pointer; font-size: 0.85rem; margin: 0 !important;">-</button>
+                        <span id="customHeroStatDisplay-${id}" style="padding: 0 2px !important; min-width: 18px !important; height: 24px; line-height: 22px; text-align: center; font-weight: bold; font-size: 0.85rem; display: inline-block; background: #111; border: 1px solid #333; border-radius: 4px; color: #fff; margin: 0 !important;">${customHeroStats[id]}</span>
+                        <button onclick="adjustCustomHeroStat(${id}, 1)" style="background: #27272a; color: #fff; border: 1px solid #3f3f46; border-radius: 4px; padding: 0 4px !important; min-width: 20px !important; height: 24px; cursor: pointer; font-size: 0.85rem; margin: 0 !important;">+</button>
+                        <button onclick="removeCustomHeroStat(${id})" title="Remover status" style="background: transparent; color: #ef4444; border: none; cursor: pointer; padding: 0 2px; margin-left: 2px; font-weight: bold; font-size: 0.9rem;">✕</button>
+                    </div>
+                </div>
+            `;
+            customContainer.insertAdjacentHTML('beforeend', statHtml);
+        });
+    }
+
+    // 4. Restaurar Inimigos
+    const enemiesContainer = document.getElementById('enemiesContainer');
+    if (enemiesContainer) enemiesContainer.innerHTML = '';
+    enemiesData = {};
+    if (state.enemyCounter !== undefined) enemyCounter = state.enemyCounter;
+
+    if (state.enemies && Array.isArray(state.enemies)) {
+        state.enemies.forEach(enemy => {
+            const id = parseInt(enemy.id, 10);
+            enemiesData[id] = { hp: enemy.hp !== undefined ? enemy.hp : 0, maxHp: enemy.maxHp || 200 };
+
+            const enemyCardHtml = `
+                <div class="combat-section enemy-section" id="enemyCard-${id}" style="margin-bottom: 20px; border: 1px solid #333; padding: 12px; border-radius: 8px; background-color: #1e1e24; border-left: 4px solid #f97316;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="margin: 0; color: #fdba74; font-size: 1rem;">😈 Inimigo ${id + 1}</h3>
+                        <button onclick="removeEnemy(${id})" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 4px; cursor: pointer; padding: 2px 8px; font-size: 0.75rem;">Remover</button>
+                    </div>
+                    
+                    <div class="stat-row">
+                        <span class="stat-label">Vida (HP):</span>
+                        <div class="counter-control">
+                            <button class="btn-minus" onclick="adjustDynEnemyHp(${id}, -1)">-</button>
+                            <span id="enemyHpDisplay-${id}" class="display-value">${enemiesData[id].hp}/${enemiesData[id].maxHp}</span>
+                            <button class="btn-plus" onclick="adjustDynEnemyHp(${id}, 1)">+</button>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-row" style="flex-direction: column !important; align-items: flex-start !important; gap: 4px;">
+                        <span class="stat-label">Dano / Info do Inimigo:</span>
+                        <input type="text" 
+                               id="enemyCustomText-${id}" 
+                               value="${(enemy.customText || '').replace(/"/g, '&quot;')}"
+                               placeholder="Digite o dano, ataque ou tipo..." 
+                               style="background: #121216; color: #ffffff; border: 1px solid #3f3f46; border-radius: 6px; padding: 6px 8px; font-size: 0.85rem; width: 100%; box-sizing: border-box;" 
+                               onfocus="if(typeof deselectCard === 'function') deselectCard();" />
+                    </div>
+
+                    <textarea id="enemyNotes-${id}" class="notes-area" placeholder="Anotações deste inimigo..." onfocus="if(typeof deselectCard === 'function') { deselectCard(); }">${enemy.notes || ''}</textarea>
+                </div>
+            `;
+            enemiesContainer.insertAdjacentHTML('beforeend', enemyCardHtml);
+        });
+    }
+}
+
+// Exportação global das funções de save/load do combate
+window.getCombatState = getCombatState;
+window.setCombatState = setCombatState;
+window.toggleCombatPanel = toggleCombatPanel;
+window.closeInspector = closeInspector;
+window.adjustHeroHp = adjustHeroHp;
+window.addCustomHeroStat = addCustomHeroStat;
+window.adjustCustomHeroStat = adjustCustomHeroStat;
+window.removeCustomHeroStat = removeCustomHeroStat;
+window.addNewEnemy = addNewEnemy;
+window.removeEnemy = removeEnemy;
+window.adjustDynEnemyHp = adjustDynEnemyHp;
 </script>
 
 
@@ -4535,12 +4711,17 @@ function processarContadoresDeTurno() {
                         let alvoRegressivo = null;
                         let alvoProgressivo = null;
 
-                        if (matchAlvo) {
+                      if (matchAlvo) {
                             let alvoVal = parseFloat(matchAlvo[1] !== undefined ? matchAlvo[1] : matchAlvo[3]);
                             if (operador === '-' || operador === '/') alvoRegressivo = alvoVal;
                             else alvoProgressivo = alvoVal;
+                        } else if (operador === '-') {
+                            // 🌟 REGRA AUTOMÁTICA: Se for formato X - Y Zt sem alvo explícito, dispara ao atingir ou passar de 0
+                            alvoRegressivo = 0;
                         }
-
+                        
+                        
+                        
                         if (t > max) {
                             if (operador === '+') v += modVal;
                             else if (operador === '-') v -= modVal;
@@ -5071,6 +5252,7 @@ setInterval(() => {
 // FIM DOS CONTROLES FLUTUANTES DO DADO
 // ==========================================
 </script>
+
 
 
 
