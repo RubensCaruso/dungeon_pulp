@@ -4347,10 +4347,14 @@ function adjustCustomHeroStat(id, amount) {
     if (display) display.innerText = customHeroStats[id];
 }
 
+// --- FUNÇÃO DE REMOÇÃO DE STATUS CUSTOMIZADO COM CONFIRMAÇÃO ---
 function removeCustomHeroStat(id) {
-    delete customHeroStats[id];
-    const row = document.getElementById(`customHeroStatRow-${id}`);
-    if (row) row.remove();
+    // Exibe uma caixa de diálogo nativa de confirmação
+    if (confirm("Tem certeza que deseja remover este status?")) {
+        delete customHeroStats[id];
+        const row = document.getElementById(`customHeroStatRow-${id}`);
+        if (row) row.remove();
+    }
 }
 
 // --- LÓGICA DE INIMIGOS (GERADOR DINÂMICO) ---
@@ -4395,10 +4399,14 @@ function addNewEnemy() {
     container.insertAdjacentHTML('beforeend', enemyCardHtml);
 }
 
+// --- FUNÇÃO DE REMOÇÃO DE INIMIGO COM CONFIRMAÇÃO ---
 function removeEnemy(id) {
-    delete enemiesData[id];
-    const card = document.getElementById(`enemyCard-${id}`);
-    if(card) card.remove();
+    // Exibe uma caixa de diálogo nativa de confirmação
+    if (confirm(`Tem certeza que deseja remover o Inimigo ${id + 1}?`)) {
+        delete enemiesData[id];
+        const card = document.getElementById(`enemyCard-${id}`);
+        if (card) card.remove();
+    }
 }
 
 function adjustDynEnemyHp(id, amount) {
