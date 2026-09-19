@@ -4207,8 +4207,6 @@ window.addEventListener('load', initLousaGlobal);
 
 
 
-
-
 <!-- PAINEL DE COMBATE (HTML) -->
 <div id="inspectorPanel" class="inspector-drawer">
     
@@ -4238,25 +4236,16 @@ window.addEventListener('load', initLousaGlobal);
             </div>
         </div>
 
-
-
-
-
-
         <!-- Container onde serão inseridos os status/contadores adicionais criados pelo jogador -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-    <span style="font-weight: bold; color: #fff; font-size: 0.9rem;">Status Personalizados</span>
-    <button id="toggleCustomStatsBtn" onclick="toggleCustomHeroStats()" style="background: #27272a; color: #fff; border: 1px solid #3f3f46; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer;">Esconder</button>
-</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: bold; color: #fff; font-size: 0.9rem;">Status Personalizados</span>
+            <button id="toggleCustomStatsBtn" onclick="toggleCustomHeroStats()" style="background: #27272a; color: #fff; border: 1px solid #3f3f46; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer;">Esconder</button>
+        </div>
 
-<!-- Container onde ficam os campos dinâmicos gerados -->
-<div id="customHeroStatsContainer">
-    <!-- Seus campos dinâmicos entram aqui -->
-</div>
-
-
-
-
+        <!-- Container onde ficam os campos dinâmicos gerados -->
+        <div id="customHeroStatsContainer">
+            <!-- Seus campos dinâmicos entram aqui -->
+        </div>
 
         <!-- Cabeçalho do botão de notas -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
@@ -4278,34 +4267,17 @@ window.addEventListener('load', initLousaGlobal);
 
     <hr class="section-divider">
 
-
-
-
-<div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin: 0 !important; padding: 0 !important; line-height: 1;">
-    <span style="color: #ffffff; font-size: 0.9rem; font-weight: bold; cursor: pointer; margin: 0 !important; padding: 0 !important;" onclick="addNewEnemy()">Adicionar Inimigo</span>
-    <button class="btn-add-enemy" onclick="addNewEnemy()">+</button>
-</div>
-
-
-
-
+    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin: 0 !important; padding: 0 !important; line-height: 1;">
+        <span style="color: #ffffff; font-size: 0.9rem; font-weight: bold; cursor: pointer; margin: 0 !important; padding: 0 !important;" onclick="addNewEnemy()">Adicionar Inimigo</span>
+        <button class="btn-add-enemy" onclick="addNewEnemy()">+</button>
+    </div>
 
     <div class="enemies-scroll-area" id="enemiesContainer" style="flex: 1; overflow-y: auto; padding-top: 15px;">
     </div>
 
 </div>
 
-
-
-
-
-
-
-
-
-
-
-<!-- SCRIPT DO PAINEL DE COMBATE COM BOTÕES COMPACTOS E VELOCIDADE AJUSTADA -->
+<!-- SCRIPT DO PAINEL DE COMBATE COM REDIMENSIONAMENTO DE TEXTO PRESERVADO -->
 <script>
 // --- VARIÁVEIS DE CONTROLE PARA O CLIQUE CONTÍNUO ---
 let holdInterval = null;
@@ -4384,21 +4356,21 @@ function adjustHeroHp(amount) {
 }
 
 // --- LÓGICA DE STATUS CUSTOMIZADOS DO HERÓI ---
-function addCustomHeroStat() {
+function addCustomHeroStat(name = '', value = 0, textareaHeight = '') {
     const id = customHeroStatCounter++;
-    customHeroStats[id] = 0;
+    customHeroStats[id] = value;
 
     const container = document.getElementById('customHeroStatsContainer');
 
     const statHtml = `
         <div class="stat-row" id="customHeroStatRow-${id}" style="display: flex; align-items: flex-start; justify-content: space-between; margin-top: 6px; gap: 4px; width: 100%;">
             <textarea placeholder="Nome..." 
-                      style="background: #111; color: #fff; border: 1px solid #444; border-radius: 4px; padding: 2px 6px; font-size: 0.85rem; flex: 1; min-width: 0; resize: vertical; height: 24px; min-height: 24px; line-height: 20px; box-sizing: border-box;"
-                      onfocus="if(typeof deselectCard === 'function') deselectCard();"></textarea>
+                    style="background: #111; color: #fff; border: 1px solid #444; border-radius: 4px; padding: 2px 6px; font-size: 0.85rem; flex: 1; min-width: 0; resize: vertical; height: ${textareaHeight || '24px'}; min-height: 24px; line-height: 20px; box-sizing: border-box;"
+                    onfocus="if(typeof deselectCard === 'function') deselectCard();">${name}</textarea>
             
             <div style="display: flex; align-items: center; gap: 0px; flex-shrink: 0; padding-top: 2px; margin: 0; padding-left: 0; padding-right: 0;">
                 <button onmousedown="startHolding((amt) => adjustCustomHeroStat(${id}, amt), -1)" ontouchstart="startHolding((amt) => adjustCustomHeroStat(${id}, amt), -1)" style="background: #27272a; color: #fff; border: 1px solid #3f3f46; border-radius: 4px 0 0 4px; padding: 0 2px !important; min-width: 16px !important; height: 24px; cursor: pointer; font-size: 0.85rem; margin: 0 !important; user-select: none;">-</button>
-                <span id="customHeroStatDisplay-${id}" style="padding: 0 4px !important; min-width: 24px !important; height: 24px; line-height: 22px; text-align: center; font-weight: bold; font-size: 0.85rem; display: inline-block; background: #111; border-top: 1px solid #333; border-bottom: 1px solid #333; border-left: none; border-right: none; color: #fff; margin: 0 !important; white-space: nowrap;">0</span>
+                <span id="customHeroStatDisplay-${id}" style="padding: 0 4px !important; min-width: 24px !important; height: 24px; line-height: 22px; text-align: center; font-weight: bold; font-size: 0.85rem; display: inline-block; background: #111; border-top: 1px solid #333; border-bottom: 1px solid #333; border-left: none; border-right: none; color: #fff; margin: 0 !important; white-space: nowrap;">${value}</span>
                 <button onmousedown="startHolding((amt) => adjustCustomHeroStat(${id}, amt), 1)" ontouchstart="startHolding((amt) => adjustCustomHeroStat(${id}, amt), 1)" style="background: #27272a; color: #fff; border: 1px solid #3f3f46; border-radius: 0 4px 4px 0; padding: 0 2px !important; min-width: 16px !important; height: 24px; cursor: pointer; font-size: 0.85rem; margin: 0 !important; user-select: none;">+</button>
                 
                 <button onclick="moveElementUp(document.getElementById('customHeroStatRow-${id}'))" title="Mover para cima" style="background: transparent; color: #38bdf8; border: none; cursor: pointer; padding: 0; margin: 0 0 0 2px !important; font-weight: bold; font-size: 0.85rem; line-height: 1;">⬆️</button>
@@ -4417,7 +4389,6 @@ function adjustCustomHeroStat(id, amount) {
     if (display) display.innerText = customHeroStats[id];
 }
 
-// --- FUNÇÃO DE REMOÇÃO DE STATUS CUSTOMIZADO COM CONFIRMAÇÃO ---
 function removeCustomHeroStat(id) {
     if (confirm("Tem certeza que deseja remover este status?")) {
         delete customHeroStats[id];
@@ -4427,13 +4398,16 @@ function removeCustomHeroStat(id) {
 }
 
 // --- LÓGICA DE INIMIGOS (GERADOR DINÂMICO) ---
-function addNewEnemy() {
-    const id = enemyCounter++;
-    enemiesData[id] = { hp: 0, maxHp: 200 };
+function addNewEnemy(savedData = null) {
+    const id = savedData ? savedData.id : enemyCounter++;
+    const hp = savedData ? savedData.hp : 0;
+    const maxHp = savedData ? savedData.maxHp : 200;
+    
+    enemiesData[id] = { hp: hp, maxHp: maxHp };
 
     const container = document.getElementById('enemiesContainer');
 
-   const enemyCardHtml = `
+    const enemyCardHtml = `
         <div class="combat-section enemy-section" id="enemyCard-${id}" style="margin-bottom: 8px; border: 1px solid #333; padding: 8px; border-radius: 6px; background-color: #1e1e24; border-left: 3px solid #f97316;">
             <div style="display: flex; justify-space: space-between; align-items: center; margin-bottom: 6px;">
                 <h3 style="margin: 0; color: #fdba74; font-size: 0.85rem;">😈 Inimigo ${id + 1}</h3>
@@ -4447,24 +4421,23 @@ function addNewEnemy() {
                 <span class="stat-label" style="font-size: 0.8rem;">Vida (HP):</span>
                 <div class="counter-control">
                     <button class="btn-minus" onmousedown="startHolding((amt) => adjustDynEnemyHp(${id}, amt), -1)" ontouchstart="startHolding((amt) => adjustDynEnemyHp(${id}, amt), -1)" style="user-select: none; padding: 0 3px !important; min-width: 18px !important; height: 20px; font-size: 0.8rem;">-</button>
-                    <span id="enemyHpDisplay-${id}" class="display-value" style="min-width: 45px; white-space: nowrap; font-size: 0.8rem; height: 20px; line-height: 18px;">${enemiesData[id] ? enemiesData[id].hp : 0}/${enemiesData[id] ? enemiesData[id].maxHp : 200}</span>
+                    <span id="enemyHpDisplay-${id}" class="display-value" style="min-width: 45px; white-space: nowrap; font-size: 0.8rem; height: 20px; line-height: 18px;">${hp}/${maxHp}</span>
                     <button class="btn-plus" onmousedown="startHolding((amt) => adjustDynEnemyHp(${id}, amt), 1)" ontouchstart="startHolding((amt) => adjustDynEnemyHp(${id}, amt), 1)" style="user-select: none; padding: 0 3px !important; min-width: 18px !important; height: 20px; font-size: 0.8rem;">+</button>
                 </div>
             </div>
             
             <textarea id="enemyCustomText-${id}" 
                     placeholder="Dano / Info..." 
-                    style="background: #121216; color: #ffffff; border: 1px solid #3f3f46; border-radius: 4px; padding: 2px 6px; font-size: 0.75rem; width: 100%; resize: vertical; height: 22px; min-height: 22px; line-height: 16px; box-sizing: border-box; margin-bottom: 4px;"
-                    onfocus="if(typeof deselectCard === 'function') deselectCard();">${(typeof enemy !== 'undefined' && enemy.customText) ? enemy.customText : ''}</textarea>
+                    style="background: #121216; color: #ffffff; border: 1px solid #3f3f46; border-radius: 4px; padding: 2px 6px; font-size: 0.75rem; width: 100%; resize: vertical; height: ${savedData && savedData.customTextHeight ? savedData.customTextHeight : '22px'}; min-height: 22px; line-height: 16px; box-sizing: border-box; margin-bottom: 4px;"
+                    onfocus="if(typeof deselectCard === 'function') deselectCard();">${savedData && savedData.customText ? savedData.customText : ''}</textarea>
 
-            <textarea id="enemyNotes-${id}" class="notes-area" placeholder="Anotações..." style="resize: vertical; min-height: 40px; font-size: 0.75rem; padding: 4px;" onfocus="if(typeof deselectCard === 'function') { deselectCard(); }">${(typeof enemy !== 'undefined' && enemy.notes) ? enemy.notes : ''}</textarea>
+            <textarea id="enemyNotes-${id}" class="notes-area" placeholder="Anotações..." style="resize: vertical; height: ${savedData && savedData.notesHeight ? savedData.notesHeight : '40px'}; min-height: 40px; font-size: 0.75rem; padding: 4px;" onfocus="if(typeof deselectCard === 'function') { deselectCard(); }">${savedData && savedData.notes ? savedData.notes : ''}</textarea>
         </div>
     `;
 
     container.insertAdjacentHTML('beforeend', enemyCardHtml);
 }
 
-// --- FUNÇÃO DE REMOÇÃO DE INIMIGO COM CONFIRMAÇÃO ---
 function removeEnemy(id) {
     if (confirm(`Tem certeza que deseja remover o Inimigo ${id + 1}?`)) {
         delete enemiesData[id];
@@ -4492,6 +4465,21 @@ function toggleHeroNotes() {
     }
 }
 
+function toggleCustomHeroStats() {
+    const container = document.getElementById('customHeroStatsContainer');
+    const btn = document.getElementById('toggleCustomStatsBtn');
+    
+    if (!container || !btn) return;
+    
+    if (container.style.display === "none") {
+        container.style.display = "block";
+        btn.innerText = "Esconder";
+    } else {
+        container.style.display = "none";
+        btn.innerText = "Mostrar";
+    }
+}
+
 // ==========================================
 // FUNÇÕES DE SAVE E LOAD DO PAINEL DE COMBATE
 // ==========================================
@@ -4500,7 +4488,10 @@ function getCombatState() {
 
     const heroHpVal = heroHp || 0;
     const heroMaxHpVal = heroMaxHp || 200;
-    const heroNotesVal = document.getElementById('heroNotes') ? document.getElementById('heroNotes').value : '';
+    
+    const heroNotesEl = document.getElementById('heroNotes');
+    const heroNotesVal = heroNotesEl ? heroNotesEl.value : '';
+    const heroNotesHeight = heroNotesEl ? heroNotesEl.style.height : '';
     const heroNotesVisible = document.getElementById('heroNotesContainer') ? (document.getElementById('heroNotesContainer').style.display !== 'none') : true;
 
     const customStats = [];
@@ -4509,8 +4500,9 @@ function getCombatState() {
         const rowId = row.id.replace('customHeroStatRow-', '');
         const textareaEl = row.querySelector('textarea');
         const nameVal = textareaEl ? textareaEl.value : '';
+        const textareaHeight = textareaEl ? textareaEl.style.height : '';
         const countVal = customHeroStats[rowId] !== undefined ? customHeroStats[rowId] : 0;
-        customStats.push({ id: rowId, name: nameVal, value: countVal });
+        customStats.push({ id: rowId, name: nameVal, value: countVal, textareaHeight: textareaHeight });
     });
 
     const enemies = [];
@@ -4526,7 +4518,9 @@ function getCombatState() {
             hp: enemyObj.hp || 0,
             maxHp: enemyObj.maxHp || 200,
             customText: customTextEl ? customTextEl.value : '',
-            notes: notesEl ? notesEl.value : ''
+            customTextHeight: customTextEl ? customTextEl.style.height : '',
+            notes: notesEl ? notesEl.value : '',
+            notesHeight: notesEl ? notesEl.style.height : ''
         });
     });
 
@@ -4536,6 +4530,7 @@ function getCombatState() {
             hp: heroHpVal,
             maxHp: heroMaxHpVal,
             notes: heroNotesVal,
+            notesHeight: heroNotesHeight,
             notesVisible: heroNotesVisible
         },
         customHeroStats: customStats,
@@ -4560,7 +4555,10 @@ function setCombatState(state) {
 
         if (state.hero.notes !== undefined) {
             const heroNotes = document.getElementById('heroNotes');
-            if (heroNotes) heroNotes.value = state.hero.notes;
+            if (heroNotes) {
+                heroNotes.value = state.hero.notes;
+                if (state.hero.notesHeight) heroNotes.style.height = state.hero.notesHeight;
+            }
         }
 
         if (state.hero.notesVisible !== undefined) {
@@ -4585,26 +4583,7 @@ function setCombatState(state) {
 
     if (state.customHeroStats && Array.isArray(state.customHeroStats)) {
         state.customHeroStats.forEach(stat => {
-            const id = stat.id;
-            customHeroStats[id] = stat.value !== undefined ? stat.value : 0;
-
-            const statHtml = `
-                <div class="stat-row" id="customHeroStatRow-${id}" style="display: flex; align-items: flex-start; justify-content: space-between; margin-top: 6px; gap: 4px; width: 100%;">
-                    <textarea placeholder="Nome..." 
-                              style="background: #111; color: #fff; border: 1px solid #444; border-radius: 4px; padding: 2px 6px; font-size: 0.85rem; flex: 1; min-width: 0; resize: vertical; height: 24px; min-height: 24px; line-height: 20px; box-sizing: border-box;" 
-                              onfocus="if(typeof deselectCard === 'function') deselectCard();">${(stat.name || '')}</textarea>
-                    
-                    <div style="display: flex; align-items: center; gap: 0px; flex-shrink: 0; padding-top: 2px; margin: 0; padding-left: 0; padding-right: 0;">
-                        <button onmousedown="startHolding((amt) => adjustCustomHeroStat(${id}, amt), -1)" ontouchstart="startHolding((amt) => adjustCustomHeroStat(${id}, amt), -1)" style="background: #27272a; color: #fff; border: 1px solid #3f3f46; border-radius: 4px 0 0 4px; padding: 0 2px !important; min-width: 16px !important; height: 24px; cursor: pointer; font-size: 0.85rem; margin: 0 !important; user-select: none;">-</button>
-                        <span id="customHeroStatDisplay-${id}" style="padding: 0 4px !important; min-width: 24px !important; height: 24px; line-height: 22px; text-align: center; font-weight: bold; font-size: 0.85rem; display: inline-block; background: #111; border-top: 1px solid #333; border-bottom: 1px solid #333; border-left: none; border-right: none; color: #fff; margin: 0 !important; white-space: nowrap;">${customHeroStats[id]}</span>
-                        <button onmousedown="startHolding((amt) => adjustCustomHeroStat(${id}, amt), 1)" ontouchstart="startHolding((amt) => adjustCustomHeroStat(${id}, amt), 1)" style="background: #27272a; color: #fff; border: 1px solid #3f3f46; border-radius: 0 4px 4px 0; padding: 0 2px !important; min-width: 16px !important; height: 24px; cursor: pointer; font-size: 0.85rem; margin: 0 !important; user-select: none;">+</button>
-                        
-                        <button onclick="moveElementUp(document.getElementById('customHeroStatRow-${id}'))" title="Mover para cima" style="background: transparent; color: #38bdf8; border: none; cursor: pointer; padding: 0; margin: 0 0 0 2px !important; font-weight: bold; font-size: 0.85rem; line-height: 1;">⬆️</button>
-                        <button onclick="removeCustomHeroStat(${id})" title="Remover status" style="background: transparent; color: #ef4444; border: none; cursor: pointer; padding: 0; margin: 0 !important; font-weight: bold; font-size: 0.9rem; line-height: 1;">✕</button>
-                    </div>
-                </div>
-            `;
-            customContainer.insertAdjacentHTML('beforeend', statHtml);
+            addCustomHeroStat(stat.name || '', stat.value !== undefined ? stat.value : 0, stat.textareaHeight || '');
         });
     }
 
@@ -4615,37 +4594,7 @@ function setCombatState(state) {
 
     if (state.enemies && Array.isArray(state.enemies)) {
         state.enemies.forEach(enemy => {
-            const id = parseInt(enemy.id, 10);
-            enemiesData[id] = { hp: enemy.hp !== undefined ? enemy.hp : 0, maxHp: enemy.maxHp || 200 };
-
-       const enemyCardHtml = `
-        <div class="combat-section enemy-section" id="enemyCard-${id}" style="margin-bottom: 8px; border: 1px solid #333; padding: 8px; border-radius: 6px; background-color: #1e1e24; border-left: 3px solid #f97316;">
-            <div style="display: flex; justify-space: space-between; align-items: center; margin-bottom: 6px;">
-                <h3 style="margin: 0; color: #fdba74; font-size: 0.85rem;">😈 Inimigo ${id + 1}</h3>
-                <div style="display: flex; gap: 4px;">
-                    <button onclick="moveElementUp(document.getElementById('enemyCard-${id}'))" title="Mover para cima" style="background: transparent; color: #38bdf8; border: 1px solid #38bdf8; border-radius: 3px; cursor: pointer; padding: 1px 4px; font-size: 0.65rem;">⬆️</button>
-                    <button onclick="removeEnemy(${id})" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 3px; cursor: pointer; padding: 1px 6px; font-size: 0.65rem;">✕</button>
-                </div>
-            </div>
-            
-            <div class="stat-row" style="margin-bottom: 4px;">
-                <span class="stat-label" style="font-size: 0.8rem;">Vida (HP):</span>
-                <div class="counter-control">
-                    <button class="btn-minus" onmousedown="startHolding((amt) => adjustDynEnemyHp(${id}, amt), -1)" ontouchstart="startHolding((amt) => adjustDynEnemyHp(${id}, amt), -1)" style="user-select: none; padding: 0 3px !important; min-width: 18px !important; height: 20px; font-size: 0.8rem;">-</button>
-                    <span id="enemyHpDisplay-${id}" class="display-value" style="min-width: 45px; white-space: nowrap; font-size: 0.8rem; height: 20px; line-height: 18px;">${enemiesData[id] ? enemiesData[id].hp : 0}/${enemiesData[id] ? enemiesData[id].maxHp : 200}</span>
-                    <button class="btn-plus" onmousedown="startHolding((amt) => adjustDynEnemyHp(${id}, amt), 1)" ontouchstart="startHolding((amt) => adjustDynEnemyHp(${id}, amt), 1)" style="user-select: none; padding: 0 3px !important; min-width: 18px !important; height: 20px; font-size: 0.8rem;">+</button>
-                </div>
-            </div>
-            
-            <textarea id="enemyCustomText-${id}" 
-                    placeholder="Dano / Info..." 
-                    style="background: #121216; color: #ffffff; border: 1px solid #3f3f46; border-radius: 4px; padding: 2px 6px; font-size: 0.75rem; width: 100%; resize: vertical; height: 22px; min-height: 22px; line-height: 16px; box-sizing: border-box; margin-bottom: 4px;"
-                    onfocus="if(typeof deselectCard === 'function') deselectCard();">${(typeof enemy !== 'undefined' && enemy.customText) ? enemy.customText : ''}</textarea>
-
-            <textarea id="enemyNotes-${id}" class="notes-area" placeholder="Anotações..." style="resize: vertical; min-height: 40px; font-size: 0.75rem; padding: 4px;" onfocus="if(typeof deselectCard === 'function') { deselectCard(); }">${(typeof enemy !== 'undefined' && enemy.notes) ? enemy.notes : ''}</textarea>
-        </div>
-    `;
-            enemiesContainer.insertAdjacentHTML('beforeend', enemyCardHtml);
+            addNewEnemy(enemy);
         });
     }
 }
@@ -4663,6 +4612,7 @@ window.addNewEnemy = addNewEnemy;
 window.removeEnemy = removeEnemy;
 window.adjustDynEnemyHp = adjustDynEnemyHp;
 window.toggleCustomHeroStats = toggleCustomHeroStats;
+window.toggleHeroNotes = toggleHeroNotes;
 </script>
 
 
